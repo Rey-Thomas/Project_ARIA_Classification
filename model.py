@@ -41,15 +41,8 @@ class DataSet_MultiScale(data.Dataset):
                     index: int):
         # Select the sample
         name_image = self.keys_json[index]
-        # patch_nb_height = int(name_image[-6:-4])
-        # patch_nb_width = int(name_image[-9:-7])
-        # name_image = name_image[:-10]+name_image[-4:]
         name_image, patch_nb_height, patch_nb_width = lecture_name_param_image(name_image)
 
-        # if int(name_image[:3]) >=474:
-        #     image = cv2.imread(self.path_data+name_image[:-4]+'_001'+name_image[-4:],cv2.IMREAD_GRAYSCALE)
-        # if int(name_image[:3]) <474:
-        #     image = cv2.imread(self.path_data+name_image,cv2.IMREAD_GRAYSCALE)
         image = cv2.imread(self.path_data+name_image,cv2.IMREAD_GRAYSCALE)
 
         imcrop_25_25 = image[25*patch_nb_height:25*(patch_nb_height+1),25*patch_nb_width:25*(patch_nb_width+1)]
@@ -87,8 +80,11 @@ if __name__ == '__main__':
         # Reading from json file
         json_dict_valid = json.load(jsonfile)
 
-    print(f'len valid!!!!!!!!: {len(json_dict_valid)}')
-    print(f'len train!!!!!!!!: {len(json_dict_train)}')
+    # print(f'len valid!!!!!!!!: {len(json_dict_valid)}')
+    # print(f'len train!!!!!!!!: {len(json_dict_train)}')
+
+
+    ###   Parameters to change:   ###
 
     Fine_Tunning = True
     lr = 0.8#5*10**(-1)
@@ -141,10 +137,9 @@ if __name__ == '__main__':
                                             batch_size=batch_size, #len total of valid.json
                                             shuffle=False)
 
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum = momentum) #maybe essayer un autre optimizer même si c'est celui utilisé dans l'article
-    #weight = torch.tensor([4677/7846, 2415/7846, 49/7846, 10/7846, 594/7846, 1/7846]) #weight old dataset
-    #weight = torch.tensor([1, 13377/4701, 13377/1979, 13377/100]) #weight total classe okay / total classe i
-    weight = torch.tensor([1/12053, 1/4200, 1/1790, 1/94]) #weight 1/ nbr d'element dans la classe dans le train set
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum = momentum) 
+    
+    weight = torch.tensor([1/12053, 1/4200, 1/1790, 1/94])
     weight = weight.to(device)
     if loss_name == 'BCE':
         criterion = nn.BCEWithLogitsLoss()
@@ -201,11 +196,8 @@ if __name__ == '__main__':
                     label = label.data.max(1, keepdim=True)[1]
                     label_tot = torch.cat((label_tot, label),dim=0)
 
-                    #print(f'pred {pred} of type {type(pred)} of size {pred.size()}\n label {label} of type {type(label)} of size {label.size()}')
                     correct += pred.eq(label.data.view_as(pred)).cpu().sum()
-                    #print(f'pred {pred}\n label {label} correct {correct}')
-                    #print(f'batch valid {batch_idx}: loss = {loss.item():.6f}, Accuracy : {correct}/{len(image_multiscale)}')
-                print(len(valid_dataloader))
+
                 loss_dict[phase].append(mean_loss/len(valid_dataloader))
                 pred_tot = pred_tot.to(torch.int)
                 label_tot = label_tot.to(torch.int)
@@ -225,9 +217,6 @@ if __name__ == '__main__':
     finish = time.time()
 
 
-
-    #PATH = f'Model/MultiScale_loss_{loss_name}_lr_{lr}_epochs_{nb_epochs}_batch_size_{batch_size}_use_weight_{use_weight}.pth'
-    #torch.save(model, PATH)
     
     minutes, seconds = divmod(finish-start , 60)
     loss_dict['training time'] = f'{minutes} min'
@@ -237,9 +226,7 @@ if __name__ == '__main__':
     loss_dict['use weight'] = use_weight
     loss_dict['fine tunning'] = Fine_Tunning
     
-    #print(weight.to('cpu').numpy())
-    #loss_dict['weight'] = list(weight.to('cpu').numpy()) #,not serialiazble
-
+#saving the json file with a lot of parameters of the training
     if multi_scale:
         with open(f'Model/MultiScale_model_{name_model}_loss_{loss_name}_lr_{lr}_epochs_{nb_epochs}_batch_size_{batch_size}_use_weight_{use_weight}_Fine_Tunning_{Fine_Tunning}/trainning_info.json', 'w') as jsonfile:
             # Reading from json file

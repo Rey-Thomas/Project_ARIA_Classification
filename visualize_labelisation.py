@@ -15,7 +15,7 @@ correct = 0
 liste_image = ['239_Layer00223_Visible_LayeringEnd.jpg', '269_Layer00003_Visible_LayeringEnd.jpg', '437_Layer00041_Visible_LayeringEnd.jpg']
 image_resize = [224,224]
 
-for name_img in liste_image: # 3 images totales dans le test set
+for name_img in liste_image: 
     path_image = 'D:/ARIA/Dataset/Image/Photo_recadree/' + name_img
     image = cv2.imread(path_image)
     for key in json_dict_test.keys():
@@ -31,14 +31,6 @@ for name_img in liste_image: # 3 images totales dans le test set
                 name_image, patch_nb_height, patch_nb_width = lecture_name_param_image(key)
             
                 image = draw_patches_image(image, label, patch_nb_width,  patch_nb_height)
-
-
-                # path_image = 'D:/ARIA/Dataset/Image/Photo_recadree/' + name_image
-                # im = cv2.imread(path_image)
-                # print(np.shape(im))
-                # imline = polylines(im, patch_nb_height, patch_nb_width)
-            
-                #print(output)
 
     window_name = 'image'
 #     cv2.namedWindow(window_name,cv2.WINDOW_NORMAL)# cv2.WINDOW_NORMAL)

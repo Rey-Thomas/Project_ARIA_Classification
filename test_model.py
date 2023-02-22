@@ -9,15 +9,13 @@ import torchmetrics
 from model import DataSet_MultiScale
 from utils_fcts import polylines, lecture_name_param_image, lecture_json_training, draw_patches_image
 
-#pour eviter l'erreur: OMP: Error #15: Initializing libiomp5md.dll, but found libiomp5md.dll already initialized.
 import os
-os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE" #due to an error (OMP: Error #15: Initializing libiomp5md.dll, but found libiomp5md.dll already initialized.)
 
 folder_name = 'MultiScale_model_ResNet50_loss_CE_lr_0.8_epochs_150_batch_size_64_use_weight_True_Fine_Tunning_True_multiscaling_input_False/'
 model_name = 'model_epochs_149_acc_82'
 multi_scale =  True
 
-#PATH= f'Model/{model_name}.pth'
 PATH = f'Model/{folder_name}{model_name}.pth'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 #device ='cpu'
@@ -39,14 +37,6 @@ model = resnet50()
 model.fc = nn.Linear(in_features=2048, out_features=4)
 image_resize = [224,224]
 
-# from torchvision.models import mobilenet_v3_large
-# model = mobilenet_v3_large()
-# model.classifier = nn.Linear(in_features=960, out_features=4)
-# image_resize = [224, 224]
-# from torchvision.models import vit_b_16, ViT_B_16_Weights
-# model = vit_b_16(weights=ViT_B_16_Weights.IMAGENET1K_SWAG_E2E_V1)
-# model.heads = nn.Linear(in_features=768, out_features=4)
-# image_resize = [384,384]
 model.load_state_dict(state_dict)
 model.to(device)
 
@@ -55,27 +45,11 @@ print('model  eval')
 model.eval()
 metric = torchmetrics.Accuracy(num_classes=4, average = None).to(device)
 f1 = torchmetrics.F1Score(task="multiclass", num_classes=4).to(device)
-#image_work_on = "496_Layer00052_Visible_LayeringEnd.png"
 
 with open('test.json', 'r') as jsonfile:
         # Reading from json file
         json_dict_test = json.load(jsonfile)
 
-###Utile avant qd j'avais pas de test.json
-# json_dict = {}
-# for i in range(38):
-#     for j in range(38):
-#         if i>9 and j>9:
-#             json_dict[image_work_on[:-4] + '_'+str(i)+'_'+str(j) + image_work_on[-4:]] = 0 #j'ai change la fin pour qu' on ai pas de pb avec les formats png et jpg
-#         if i<=9 and j>9:
-#             json_dict[image_work_on[:-4] + '_0'+str(i)+'_'+str(j) + image_work_on[-4:]] = 0
-#         if i>9 and j<=9:
-#             json_dict[image_work_on[:-4] + '_'+str(i)+'_0'+str(j) + image_work_on[-4:]] = 0
-#         if i<=9 and j<=9:
-#             json_dict[image_work_on[:-4] + '_0'+str(i)+'_0'+str(j) + image_work_on[-4:]] = 0
-
-# if int(image_work_on[:3])>= 474 :
-#     image_work_on = image_work_on[:-4] + '_001' + image_work_on[-4:]
 
 test_dict = {}
 correct = 0
@@ -84,7 +58,7 @@ pred_tot = torch.tensor([])
 pred_tot = pred_tot.to(device)
 label_tot = torch.tensor([])
 label_tot = label_tot.to(device)
-for name_img in liste_image: # 3 images totales dans le test set
+for name_img in liste_image: # 3 total image in the testset
     path_image = 'D:/ARIA/Dataset/Image/Photo_recadree/' + name_img
     image = cv2.imread(path_image)
     for key in json_dict_test.keys():
@@ -112,13 +86,6 @@ for name_img in liste_image: # 3 images totales dans le test set
             
                 image = draw_patches_image(image, output, patch_nb_width, patch_nb_height)
 
-
-                # path_image = 'D:/ARIA/Dataset/Image/Photo_recadree/' + name_image
-                # im = cv2.imread(path_image)
-                # print(np.shape(im))
-                # imline = polylines(im, patch_nb_height, patch_nb_width)
-            
-                #print(output)
 
     window_name = 'image'
 #     cv2.namedWindow(window_name,cv2.WINDOW_NORMAL)# cv2.WINDOW_NORMAL)

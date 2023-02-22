@@ -1,0 +1,6 @@
+labelisation.py : to label random patches in images
+distrib_lable.py : to see the distribution of the dataset
+model.py :  creation and training of the model
+test_model.py :  to test the model on the testset
+test_score.py : to create the confusion matrix
+train_test_valid.py :  to divide the labeled dataset in 3 (70% for training, 20% for testing and 10% for the validation)
